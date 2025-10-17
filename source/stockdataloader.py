@@ -17,16 +17,29 @@ if torch.cuda.is_available():
     torch.backends.cudnn.benchmark = True
 print(f"Using device: {device}")
 
-stockdf = pd.read_csv("../data/A.csv")
-print(f"Total examples in dataset: {len(stockdf)}")
+path = "../data/A.csv"
 
-train_df = stockdf.iloc[0:(len(stockdf)-1)]
-val_df = stockdf.iloc[7:]
+def load_stock_data(path=path):
 
-print(f"Training examples: {len(train_df)}")
-print(f"Validation examples: {len(val_df)}")
+    stockdf = pd.read_csv(path)
+    print(f"Total examples in dataset: {len(stockdf)}")
 
-assert len(stockdf) - 1 == len(train_df)
-assert len(stockdf) - len(val_df) == 7
+    train_df = stockdf.iloc[0:(len(stockdf)-1)]
+    val_df = stockdf.iloc[7:]
 
-print((train_df.head()))
+    #print(f"Training examples: {len(train_df)}")
+    #print(f"Validation examples: {len(val_df)}")
+
+    assert len(stockdf) - 1 == len(train_df)
+    assert len(stockdf) - len(val_df) == 7
+
+    return train_df, val_df
+
+if __name__ == "__main__":
+    train_df, val_df = load_stock_data(path)
+    
+    print(f"Training examples: {len(train_df)}")
+    print(f"Validation examples: {len(val_df)}")
+
+    print((train_df.head()))
+
