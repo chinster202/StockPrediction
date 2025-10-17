@@ -9,6 +9,7 @@ import nltk
 from nltk.tokenize import word_tokenize
 import json
 from tqdm.auto import tqdm  # for progress bars
+import config
 
 
 # Set device and enable cuDNN benchmarking for faster training
@@ -24,22 +25,26 @@ def load_stock_data(path=path):
     stockdf = pd.read_csv(path)
     print(f"Total examples in dataset: {len(stockdf)}")
 
-    train_df = stockdf.iloc[0:(len(stockdf)-1)]
-    val_df = stockdf.iloc[7:]
+    # Normalize all columns except Date
+    cols_to_normalize = stockdf.columns.difference(['Date'])
+    stockdf[cols_to_normalize] = (stockdf[cols_to_normalize] - stockdf[cols_to_normalize].min()) / (stockdf[cols_to_normalize].max() - stockdf[cols_to_normalize].min())
 
-    #print(f"Training examples: {len(train_df)}")
+    contexts_df = stockdf.iloc[0:(len(stockdf)-1)]
+    targets_df = stockdf.iloc[7:]
+
+    #print(f"Training examples: {len(contexts_df)}")
     #print(f"Validation examples: {len(val_df)}")
 
-    assert len(stockdf) - 1 == len(train_df)
-    assert len(stockdf) - len(val_df) == 7
+    assert len(stockdf) - 1 == len(contexts_df)
+    assert len(stockdf) - len(targets_df) == 7
 
-    return train_df, val_df
+    return contexts_df, targets_df
 
 if __name__ == "__main__":
-    train_df, val_df = load_stock_data(path)
+    contexts_df, targets_df = load_stock_data(path)
     
-    print(f"Training examples: {len(train_df)}")
-    print(f"Validation examples: {len(val_df)}")
+    print(f"Training examples: {len(contexts_df)}")
+    print(f"Validation examples: {len(targets_df)}")
 
-    print((train_df.head()))
+    print((contexts_df.head()))
 
