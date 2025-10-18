@@ -26,9 +26,12 @@ def load_stock_data(path=path):
     print(f"Total examples in dataset: {len(stockdf)}")
 
     # Normalize all columns except Date
-    cols_to_normalize = stockdf.columns.difference(['Date'])
-    stockdf[cols_to_normalize] = (stockdf[cols_to_normalize] - stockdf[cols_to_normalize].min()) / (stockdf[cols_to_normalize].max() - stockdf[cols_to_normalize].min())
+    cols_to_standardize = stockdf.columns.difference(['Date'])
 
+    print(cols_to_standardize)
+    #stockdf[cols_to_normalize] = (stockdf[cols_to_normalize] - stockdf[cols_to_normalize].min()) / (stockdf[cols_to_normalize].max() - stockdf[cols_to_normalize].min())
+    stockdf[cols_to_standardize] = (stockdf[cols_to_standardize] - stockdf[cols_to_standardize].mean()) / stockdf[cols_to_standardize].std()
+    
     contexts_df = stockdf.iloc[0:(len(stockdf)-1)]
     targets_df = stockdf.iloc[7:]
 
@@ -45,6 +48,9 @@ if __name__ == "__main__":
     
     print(f"Training examples: {len(contexts_df)}")
     print(f"Validation examples: {len(targets_df)}")
+
+    print(contexts_df[:3])
+    print(targets_df[:3])
 
     print((contexts_df.head()))
 
