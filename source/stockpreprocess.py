@@ -8,6 +8,20 @@ import config
 
 train_df, val_df = stockdataloader.load_stock_data(stockdataloader.path)
 
+class StockDataset(Dataset):
+    def __init__(self, contexts, targets):
+        self.contexts = contexts
+        self.targets = targets
+    
+    def __len__(self):
+        return len(self.contexts)
+    
+    def __getitem__(self, idx):
+        return {
+            'context': self.contexts[idx],
+            'target': self.targets[idx]
+        }
+
 def preprocess_stock_data(train_df, val_df):
 
     train_df_no_date = train_df.drop(columns=['Date'])
@@ -23,64 +37,50 @@ def preprocess_stock_data(train_df, val_df):
     train_target_data = targets[:int(len(targets)*config.train_test_split_percent)]
     val_context_data = contexts[int(len(contexts)*config.train_test_split_percent):]
     val_target_data = targets[int(len(targets)*config.train_test_split_percent):]
+
+    # Create datasets
+    train_dataset = StockDataset(
+        train_context_data,
+        train_target_data
+    )
+
+    val_dataset = StockDataset(
+        val_context_data,
+        val_target_data
+    )
+
+    # Create data loaders with larger batch size and pin_memory for faster data transfer
+    batch_size = 32
+    train_loader = DataLoader(
+        train_dataset,
+        batch_size=batch_size,
+        shuffle=True,
+        num_workers=2 if torch.cuda.is_available() else 0,
+        pin_memory=torch.cuda.is_available()
+    )
+
+    val_loader = DataLoader(
+        val_dataset,
+        batch_size=batch_size,
+        shuffle=False,
+        num_workers=2 if torch.cuda.is_available() else 0,
+        pin_memory=torch.cuda.is_available()
+    )
+
+    # Convert to tensors
+    train_context_data = torch.tensor(train_context_data, dtype=torch.long)
+    train_target_data = torch.tensor(train_target_data, dtype=torch.long)
+    val_context_data = torch.tensor(val_context_data, dtype=torch.long)
+    val_target_data = torch.tensor(val_target_data, dtype=torch.long)
     
-    return train_context_data, train_target_data, val_context_data, val_target_data
+    return train_context_data, train_target_data, val_context_data, val_target_data, train_loader, val_loader
 
-train_context_data, train_target_data, val_context_data, val_target_data = preprocess_stock_data(train_df, val_df)
-
-class StockDataset(Dataset):
-    def __init__(self, contexts, targets):
-        self.contexts = contexts
-        self.targets = targets
-    
-    def __len__(self):
-        return len(self.contexts)
-    
-    def __getitem__(self, idx):
-        return {
-            'context': self.contexts[idx],
-            'target': self.targets[idx]
-        }
-
-# Create datasets
-train_dataset = StockDataset(
-    train_context_data,
-    train_target_data
-)
-
-val_dataset = StockDataset(
-    val_context_data,
-    val_target_data
-)
-
-# Create data loaders with larger batch size and pin_memory for faster data transfer
-batch_size = 32
-train_loader = DataLoader(
-    train_dataset,
-    batch_size=batch_size,
-    shuffle=True,
-    num_workers=2 if torch.cuda.is_available() else 0,
-    pin_memory=torch.cuda.is_available()
-)
-
-val_loader = DataLoader(
-    val_dataset,
-    batch_size=batch_size,
-    shuffle=False,
-    num_workers=2 if torch.cuda.is_available() else 0,
-    pin_memory=torch.cuda.is_available()
-)
-
-# Convert to tensors
-train_context_data = torch.tensor(train_context_data, dtype=torch.long)
-train_target_data = torch.tensor(train_target_data, dtype=torch.long)
-val_context_data = torch.tensor(val_context_data, dtype=torch.long)
-val_target_data = torch.tensor(val_target_data, dtype=torch.long)
+#train_context_data, train_target_data, val_context_data, val_target_data = preprocess_stock_data(train_df, val_df)
 
 print("Data preprocessing completed!")
 
 if __name__ == "__main__":
-    train_context_data, train_target_data, val_context_data, val_target_data = preprocess_stock_data(train_df, val_df)
+    train_context_data, train_target_data, val_context_data, val_target_data, train_loader, val_loader = preprocess_stock_data(train_df, val_df)
     print(f"Number of training contexts: {len(train_context_data)}")
     print(f"Number of training targets: {len(train_target_data)}")
     print("First context:", train_context_data[0])
