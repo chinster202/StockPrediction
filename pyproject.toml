@@ -8,5 +8,7 @@ dependencies = [
     "matplotlib>=3.10.7",
     "numpy>=2.3.3",
     "pandas>=2.3.3",
+    "ruff>=0.14.1",
+    "scikit-learn>=1.7.2",
     "torch>=2.8.0",
 ]

@@ -1,0 +1,17 @@
+data:
+  train_test_split_percent: 0.8
+  sequence_length: 6
+  batch_size: 32
+  data_path: "../data/A.csv"
+
+model:
+  hidden_dim: 64
+  num_layers: 2
+  dropout: 0.2
+  input_size: 6
+
+training:
+  epochs: 50
+  learning_rate: 0.001
+  patience: 5
+  lr_factor: 0.5
