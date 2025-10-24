@@ -164,8 +164,6 @@ def plot_predictions(val_target, val_output, means, stds):
     plt.legend()
     plt.grid(True, alpha=0.3)
     plt.savefig("results/output.png")
-    plt.show()
-
 
 
 # if __name__ == "__main__":

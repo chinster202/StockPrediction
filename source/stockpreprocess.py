@@ -47,10 +47,10 @@ def preprocess_stock_data(contexts_df, targets_df):
     # )
 
     # Convert to tensors
-    train_context_data = torch.tensor(train_context_data, dtype=torch.long)
-    train_target_data = torch.tensor(train_target_data, dtype=torch.long)
-    val_context_data = torch.tensor(val_context_data, dtype=torch.long)
-    val_target_data = torch.tensor(val_target_data, dtype=torch.long)
+    train_context_data = torch.tensor(train_context_data, dtype=torch.float32)
+    train_target_data = torch.tensor(train_target_data, dtype=torch.float32)
+    val_context_data = torch.tensor(val_context_data, dtype=torch.float32)
+    val_target_data = torch.tensor(val_target_data, dtype=torch.float32)
 
     # Create datasets
     train_dataset = StockDataset(train_context_data, train_target_data)

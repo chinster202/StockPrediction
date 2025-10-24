@@ -30,8 +30,9 @@
 # stockdataloader.py
 
 import pandas as pd
+from . import config
 
-path = "data/A.csv"
+path = config.path
 
 
 def load_stock_data(path=path):
@@ -70,16 +71,20 @@ def denormalize_predictions(standardized_predictions, column_name='Close', means
     return unstandardized_column
 
 
-# if __name__ == "__main__":
-#     contexts_df, targets_df, means, stds = load_stock_data(path)
+if __name__ == "__main__":
+    contexts_df, targets_df, means, stds = load_stock_data(path)
 
-#     print(means)
-#     print(stds)
+    print(means)
+    print(stds)
 
-#     print(f"Training examples: {len(contexts_df)}")
-#     print(f"Validation examples: {len(targets_df)}")
+    print(f"Training examples: {len(contexts_df)}")
+    print(f"Validation examples: {len(targets_df)}")
 
-#     print(contexts_df[:3])
-#     print(targets_df[:3])
+    print(contexts_df[:3])
+    print(targets_df[:3])
 
-#     print((contexts_df.head()))
+    print(contexts_df.head())
+    print(f'contexts_df.tail()\n')
+
+    print((contexts_df.describe()))
+    print((targets_df.describe()))
