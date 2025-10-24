@@ -9,7 +9,7 @@ from . import stockdataloader
 from . import config
 from tqdm import tqdm
 import matplotlib.pyplot as plt
-from .model import StockLSTM
+from .model import StockLSTM, StockGRU
 import numpy as np
 
 
@@ -26,8 +26,9 @@ contexts_df, targets_df, means, stds = stockdataloader.load_stock_data(stockdata
     val_loader,
 ) = stockpreprocess.preprocess_stock_data(contexts_df, targets_df)
 
-model = StockLSTM()
+model = StockGRU() if config.model_type == "StockGRU()" else StockLSTM()
 
+print(model)
 
 def train_epoch(model, train_loader, criterion, optimizer):
     model.train()

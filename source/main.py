@@ -9,7 +9,7 @@ from . import stockdataloader
 from . import config
 from tqdm import tqdm
 import matplotlib.pyplot as plt
-from .model import StockLSTM
+from .model import StockLSTM, StockGRU
 import numpy as np
 from . import train
 
@@ -33,11 +33,16 @@ def main():
     # print(f"\nSequence length: {seq_len}, Input size (features): {input_size}")
 
     # Initialize model with config parameters
-    model = StockLSTM(
+    model = StockGRU(
         input_size=config.input_size,
         hidden_dim=config.hidden_dim,
         num_layers=config.num_layers,
-        # dropout=0.2
+        dropout=config.dropout
+    ) if config.model_type == "StockGRU()" else StockLSTM(
+        input_size=config.input_size,
+        hidden_dim=config.hidden_dim,
+        num_layers=config.num_layers,
+        dropout=config.dropout
     )
 
     print("\nModel architecture:")

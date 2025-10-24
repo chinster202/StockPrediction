@@ -9,6 +9,7 @@ model:
   num_layers: 2
   dropout: 0.3
   input_size: 6
+  model_type: "StockLSTM()"  # Options: "StockLSTM()" or "StockGRU()"
 
 training:
   epochs: 50

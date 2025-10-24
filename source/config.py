@@ -78,6 +78,7 @@ lr = config.get("training.learning_rate")
 input_size = config.get("model.input_size")
 batch_size = config.get("data.batch_size")
 dropout = config.get("model.dropout")
+model_type = config.get("model.model_type")
 
 
 if __name__ == "__main__":
