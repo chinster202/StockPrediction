@@ -37,12 +37,12 @@ def main():
         input_size=config.input_size,
         hidden_dim=config.hidden_dim,
         num_layers=config.num_layers,
-        dropout=0.3
+        dropout=config.dropout
     ) if config.model_type == "StockGRU()" else StockLSTM(
         input_size=config.input_size,
         hidden_dim=config.hidden_dim,
         num_layers=config.num_layers,
-        dropout=0.3
+        dropout=config.dropout
     )
 
     print("\nModel architecture:")
