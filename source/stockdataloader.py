@@ -1,35 +1,5 @@
-# import pandas as pd
-# # import config
-
-# path = "data/A.csv" # "../data/A.csv"
-
-# def load_stock_data(path=path):
-#     stockdf = pd.read_csv(path)
-#     print(f"Total examples in dataset: {len(stockdf)}")
-
-#     # Normalize all columns except Date
-#     cols_to_standardize = stockdf.columns.difference(["Date"])
-
-#     print(cols_to_standardize)
-#     # stockdf[cols_to_normalize] = (stockdf[cols_to_normalize] - stockdf[cols_to_normalize].min()) / (stockdf[cols_to_normalize].max() - stockdf[cols_to_normalize].min())
-#     stockdf[cols_to_standardize] = (
-#         stockdf[cols_to_standardize] - stockdf[cols_to_standardize].mean()
-#     ) / stockdf[cols_to_standardize].std()
-
-#     contexts_df = stockdf.iloc[0 : (len(stockdf) - 1)]
-#     targets_df = stockdf.iloc[7:]
-
-#     # print(f"Training examples: {len(contexts_df)}")
-#     # print(f"Validation examples: {len(val_df)}")
-
-#     # assert len(stockdf) - 1 == len(contexts_df)
-#     # assert len(stockdf) - len(targets_df) == 7
-
-#     return contexts_df, targets_df
-
-# stockdataloader.py
-
 import pandas as pd
+import numpy as np
 from . import config
 
 path = config.path
@@ -39,19 +9,46 @@ def load_stock_data(path=path):
     stockdf = pd.read_csv(path)
     print(f"Total examples in dataset: {len(stockdf)}")
 
+    # Store original statistics
+    means = {}
+    stds = {}
+
     # Normalize all columns except Date
     cols_to_standardize = stockdf.columns.difference(["Date"])
 
     print(cols_to_standardize)
+
+    # Handle Volume separately if it's causing issues
+    volume_col = 'Volume' if 'Volume' in cols_to_standardize else None
+    
+    # Standardize price columns
+    price_cols = [col for col in cols_to_standardize if col != 'Volume']
+
+    print(price_cols)
+
+    print(volume_col)
+
+    for col in price_cols:
+        means[col] = stockdf[col].mean()
+        stds[col] = stockdf[col].std()
+        stockdf[col] = (stockdf[col] - means[col]) / stds[col]
+    
+    # Handle Volume with log transform (optional but recommended)
+    if volume_col:
+        # Log transform volume to reduce scale
+        stockdf[volume_col] = np.log1p(stockdf[volume_col])
+        means[volume_col] = stockdf[volume_col].mean()
+        stds[volume_col] = stockdf[volume_col].std()
+        stockdf[volume_col] = (stockdf[volume_col] - means[volume_col]) / stds[volume_col]
     
     # Store mean and std BEFORE standardization
-    means = stockdf[cols_to_standardize].mean()
-    stds = stockdf[cols_to_standardize].std()
+    # means = stockdf[cols_to_standardize].mean()
+    # stds = stockdf[cols_to_standardize].std()
     
-    # Standardize
-    stockdf[cols_to_standardize] = (
-        stockdf[cols_to_standardize] - means
-    ) / stds
+    # # Standardize
+    # stockdf[cols_to_standardize] = (
+    #     stockdf[cols_to_standardize] - means
+    # ) / stds
 
     contexts_df = stockdf.iloc[0 : (len(stockdf) - 1)]
     targets_df = stockdf.iloc[7:]
