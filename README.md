@@ -6,4 +6,4 @@ To create an RNN to predict stock closing price given the previous seven days' c
 - [x] Task 2: Preprocess Data
 - [x] Task 3: Define model
 - [x] Task 4: Train and Validate model
-- [ ] Task 5: Output predicted values
+- [x] Task 5: Output predicted values

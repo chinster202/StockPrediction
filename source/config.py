@@ -70,6 +70,7 @@ config = Config(config_path="config.yaml")
 
 # Variables
 train_test_split_percent = config.get("data.train_test_split_percent")
+path = config.get("data.data_path")
 hidden_dim = config.get("model.hidden_dim")
 num_layers = config.get("model.num_layers")
 epochs = config.get("training.epochs")

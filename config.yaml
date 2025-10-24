@@ -2,7 +2,7 @@ data:
   train_test_split_percent: 0.8
   sequence_length: 6
   batch_size: 32
-  data_path: "../data/A.csv"
+  data_path: "data/AAPL.csv"
 
 model:
   hidden_dim: 64
