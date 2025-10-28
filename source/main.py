@@ -15,16 +15,29 @@ from . import train
 
 def main():
     # Get preprocessed data
-    contexts_df, targets_df, means, stds = stockdataloader.load_stock_data(stockdataloader.path)
+    # contexts_df, targets_df, means, stds = stockdataloader.load_stock_data(config.path)
+
+    stockdf, split_idx = stockdataloader.load_stock_data(config.path)
 
     (
-        train_context_data,
-        train_target_data,
-        val_context_data,
-        val_target_data,
-        train_loader,
-        val_loader,
-    ) = stockpreprocess.preprocess_stock_data(contexts_df, targets_df)
+    train_context_data,
+    train_target_data,
+    val_context_data,
+    val_target_data,
+    train_loader,
+    val_loader,
+    means,  # From TRAINING data only
+    stds    # From TRAINING data only
+) = stockpreprocess.preprocess_stock_data(stockdf, split_idx)
+
+    # (
+    #     _,
+    #     _,
+    #     _,
+    #     _,
+    #     train_loader,
+    #     val_loader,
+    # ) = stockpreprocess.preprocess_stock_data(contexts_df, targets_df)
 
     # Get input size from first batch
     # sample_batch = next(iter(train_loader))
@@ -33,17 +46,18 @@ def main():
     # print(f"\nSequence length: {seq_len}, Input size (features): {input_size}")
 
     # Initialize model with config parameters
-    model = StockGRU(
+    if config.model_type == "StockGRU":
+        model = StockGRU(
         input_size=config.input_size,
         hidden_dim=config.hidden_dim,
         num_layers=config.num_layers,
-        dropout=config.dropout
-    ) if config.model_type == "StockGRU()" else StockLSTM(
+        dropout=config.dropout) 
+    else:
+        model = StockLSTM(
         input_size=config.input_size,
         hidden_dim=config.hidden_dim,
         num_layers=config.num_layers,
-        dropout=config.dropout
-    )
+        dropout=config.dropout)
 
     print("\nModel architecture:")
     print(model)
