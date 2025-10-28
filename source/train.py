@@ -15,8 +15,12 @@ import numpy as np
 
 # Get preprocessed data
 
-contexts_df, targets_df, means, stds = stockdataloader.load_stock_data(stockdataloader.path)
+# contexts_df, targets_df, means, stds = stockdataloader.load_stock_data(config.path)
 
+# Load RAW data (unstandardized)
+stockdf, split_idx = stockdataloader.load_stock_data(config.path)
+
+# Preprocess with train-only standardization
 (
     train_context_data,
     train_target_data,
@@ -24,7 +28,18 @@ contexts_df, targets_df, means, stds = stockdataloader.load_stock_data(stockdata
     val_target_data,
     train_loader,
     val_loader,
-) = stockpreprocess.preprocess_stock_data(contexts_df, targets_df)
+    means,  # From TRAINING data only
+    stds    # From TRAINING data only
+) = stockpreprocess.preprocess_stock_data(stockdf, split_idx)
+
+# (
+#     train_context_data,
+#     train_target_data,
+#     val_context_data,
+#     val_target_data,
+#     train_loader,
+#     val_loader,
+# ) = stockpreprocess.preprocess_stock_data(contexts_df, targets_df)
 
 model = StockGRU() if config.model_type == "StockGRU()" else StockLSTM()
 
@@ -36,7 +51,7 @@ def train_epoch(model, train_loader, criterion, optimizer):
 
     for batch in tqdm(train_loader, desc="Training", leave=False):
         context = batch["context"].float()
-        target = batch["target"].float().unsqueeze(1)
+        target = batch["target"].float() #.unsqueeze(1)
 
         # print(context)
         # print(target)
@@ -69,7 +84,7 @@ def validate(model, val_loader, criterion):
     with torch.no_grad():
         for batch in tqdm(val_loader, desc="Validating", leave=False):
             context = batch["context"].float()
-            target = batch["target"].float().unsqueeze(1)
+            target = batch["target"].float() #.unsqueeze(1)
 
             output = model(context)
             loss = criterion(output, target)
@@ -88,7 +103,10 @@ def validate(model, val_loader, criterion):
 
 
 def train_model(model, train_loader, val_loader, epochs=config.epochs, lr=config.lr):
-    criterion = nn.MSELoss()
+    if config.error == "MSE":
+        criterion = nn.MSELoss()
+    else:
+        criterion = nn.L1Loss()
     optimizer = optim.Adam(model.parameters(), lr=lr)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(
         optimizer, mode="min", factor=0.5, patience=5
@@ -137,7 +155,7 @@ def plot_losses(train_losses, val_losses):
     plt.title("Training and Validation Loss")
     plt.legend()
     plt.grid(True)
-    plt.savefig("results/training_loss.png")
+    plt.savefig("results/training_loss_check.png")
 
 
 def plot_predictions(val_target, val_output, means, stds):
@@ -167,8 +185,26 @@ def plot_predictions(val_target, val_output, means, stds):
     plt.title(f"Stock Price Predictions - {len(val_target_denorm)} Validation Samples")
     plt.legend()
     plt.grid(True, alpha=0.3)
-    plt.savefig("results/output.png")
+    plt.savefig("results/output_check.png")
 
+
+    # Calculate percentage of predictions within ±10%
+    percentage_within_1_percent = np.mean(
+        np.abs((val_output_denorm - val_target_denorm) / val_target_denorm * 100) <= 1
+    ) * 100
+
+    # Plot 2: Difference plot
+    plt.figure(figsize=(12, 6))
+    plt.title(f"Prediction Error Percentage (Predicted - Actual)/(Actual)*100\n{percentage_within_1_percent:.2f}% of predictions within ±1% error")
+    plt.xlabel("Validation Sample Index")
+    plt.ylabel("Error (%)")
+    plt.grid(True, alpha=0.3)
+    plt.plot(x_axis, (val_output_denorm - val_target_denorm) / val_target_denorm * 100, label="Error (%)", color='orange', linewidth=2, alpha=0.8)
+    
+    # Lines at y = 1 and y = -1
+    plt.axhline(y=1, linestyle='--', color='red', label='1% Error Line')
+    plt.axhline(y=-1, linestyle='--', color='red', label='-1% Error Line')
+    plt.savefig("results/prediction_error.png") 
 
 # if __name__ == "__main__":
 #     # Get preprocessed data

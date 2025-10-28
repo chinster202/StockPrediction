@@ -71,6 +71,8 @@ config = Config(config_path="config.yaml")
 # Variables
 train_test_split_percent = config.get("data.train_test_split_percent")
 path = config.get("data.data_path")
+sequence_length = config.get("data.sequence_length")
+batch_size = config.get("data.batch_size")
 hidden_dim = config.get("model.hidden_dim")
 num_layers = config.get("model.num_layers")
 epochs = config.get("training.epochs")
@@ -79,6 +81,7 @@ input_size = config.get("model.input_size")
 batch_size = config.get("data.batch_size")
 dropout = config.get("model.dropout")
 model_type = config.get("model.model_type")
+error = config.get("training.error")
 
 
 if __name__ == "__main__":
