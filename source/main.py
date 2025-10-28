@@ -27,7 +27,8 @@ def main():
     train_loader,
     val_loader,
     means,  # From TRAINING data only
-    stds    # From TRAINING data only
+    stds,    # From TRAINING data only
+    train_df
 ) = stockpreprocess.preprocess_stock_data(stockdf, split_idx)
 
     # (
@@ -62,6 +63,9 @@ def main():
     print("\nModel architecture:")
     print(model)
     print(f"\nTotal parameters: {sum(p.numel() for p in model.parameters()):,}")
+
+    # Plot denormalized training contexts before training
+    train.plot_train_contexts(train_df)
 
     # Train model
     print(
