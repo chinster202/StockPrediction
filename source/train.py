@@ -29,7 +29,8 @@ stockdf, split_idx = stockdataloader.load_stock_data(config.path)
     train_loader,
     val_loader,
     means,  # From TRAINING data only
-    stds    # From TRAINING data only
+    stds,    # From TRAINING data only
+    train_df
 ) = stockpreprocess.preprocess_stock_data(stockdf, split_idx)
 
 # (
@@ -155,7 +156,7 @@ def plot_losses(train_losses, val_losses):
     plt.title("Training and Validation Loss")
     plt.legend()
     plt.grid(True)
-    plt.savefig("results/training_loss_check.png")
+    plt.savefig("results/training_loss.png")
 
 
 def plot_predictions(val_target, val_output, means, stds):
@@ -185,7 +186,7 @@ def plot_predictions(val_target, val_output, means, stds):
     plt.title(f"Stock Price Predictions - {len(val_target_denorm)} Validation Samples")
     plt.legend()
     plt.grid(True, alpha=0.3)
-    plt.savefig("results/output_check.png")
+    plt.savefig("results/output.png")
 
 
     # Calculate percentage of predictions within ±10%
@@ -205,6 +206,18 @@ def plot_predictions(val_target, val_output, means, stds):
     plt.axhline(y=1, linestyle='--', color='red', label='1% Error Line')
     plt.axhline(y=-1, linestyle='--', color='red', label='-1% Error Line')
     plt.savefig("results/prediction_error.png") 
+
+def plot_train_contexts(train_df):
+    # Plotting
+    plt.figure(figsize=(12, 6))
+    plt.plot(train_df['Close'], label="Actual Train Close Price", linewidth=1)
+    plt.xlabel("Timestep")
+    plt.ylabel("Close Price ($)")
+    plt.title("Actual Training 'Close' Prices")
+    plt.legend()
+    plt.grid(True, alpha=0.3)
+    plt.savefig("results/actual_train_close_prices.png")
+    print("\Actual training close prices plot saved to results/actual_train_close_prices.png")
 
 # if __name__ == "__main__":
 #     # Get preprocessed data

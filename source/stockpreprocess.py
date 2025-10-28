@@ -140,15 +140,14 @@ def preprocess_stock_data(stockdf, split_idx=config.train_test_split_percent, se
     print(f"Validation batches: {len(val_loader)}")
     print(f"Batch size: {batch_size}")
 
-    return train_contexts, train_targets, val_contexts, val_targets, train_loader, val_loader, means, stds
+    return train_contexts, train_targets, val_contexts, val_targets, train_loader, val_loader, means, stds, train_df
 
 
 print("Data preprocessing module loaded!")
 
 # if __name__ == "__main__":
 #     # Test preprocessing
-#     train_contexts, train_targets, val_contexts, val_targets, train_loader, val_loader, means, stds = \
-#         preprocess_stock_data(stockdf, split_idx)
+#     train_contexts, train_targets, val_contexts, val_targets, train_loader, val_loader, means, stds, train_df = preprocess_stock_data(stockdf, split_idx)
     
 #     print(f"\n{'='*60}")
 #     print("TESTING DATALOADERS")
@@ -295,11 +294,11 @@ print("Data preprocessing module loaded!")
 #         np.array(train_context_np), 'Close', means, stds
 #     )
 
-#     plt.figure(figsize=(10, 6))
-#     plt.plot(train_context_denorm, label="Training Data")
-#     plt.xlabel("Training Sample Index")
-#     plt.ylabel("Close ($)")
-#     plt.title("Training Data Close Price Over Samples")
-#     plt.legend()
-#     plt.grid(True)
-#     plt.savefig("results/training_closing_price.png")
+    # plt.figure(figsize=(10, 6))
+    # plt.plot(train_context_denorm, label="Training Data")
+    # plt.xlabel("Training Sample Index")
+    # plt.ylabel("Close ($)")
+    # plt.title("Training Data Close Price Over Samples")
+    # plt.legend()
+    # plt.grid(True)
+    # plt.savefig("results/training_closing_price.png")
