@@ -8,14 +8,12 @@ Tests data preprocessing, dataset creation, and dataloader functionality.
 import unittest
 import sys
 import os
-import torch
-import numpy as np
 import pandas as pd
 
 # Add parent directory to path to import source modules
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from source import stockdataloader, stockpreprocess
+from source import stockpreprocess
 
 class TestStockPreprocessing(unittest.TestCase):
     """Test cases for data preprocessing functions"""

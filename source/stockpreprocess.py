@@ -21,108 +21,119 @@ class StockDataset(Dataset):
     def __getitem__(self, idx):
         return {
             "context": torch.FloatTensor(self.contexts[idx]),
-            "target": torch.FloatTensor([self.targets[idx]])
+            "target": torch.FloatTensor([self.targets[idx]]),
         }
 
 
-def preprocess_stock_data(stockdf, split_idx=config.train_test_split_percent, sequence_length=config.sequence_length, batch_size=config.batch_size):
+def preprocess_stock_data(
+    stockdf,
+    split_idx=config.train_test_split_percent,
+    sequence_length=config.sequence_length,
+    batch_size=config.batch_size,
+):
     """
     Preprocess stock data with train-only standardization.
-    
+
     Args:
         stockdf: Raw unstandardized dataframe
         split_idx: Index to split train/val (if None, calculates 80/20)
         sequence_length: Number of timesteps in each sequence
         batch_size: Batch size for dataloaders
-    
+
     Returns:
-        train_contexts, train_targets, val_contexts, val_targets, 
+        train_contexts, train_targets, val_contexts, val_targets,
         train_loader, val_loader, means, stds
     """
-    
-    print(f"\n{'='*60}")
+
+    print(f"\n{'=' * 60}")
     print("PREPROCESSING WITH TRAIN-ONLY STANDARDIZATION")
-    print(f"{'='*60}")
-    
+    print(f"{'=' * 60}")
+
     # Split into train and validation BEFORE standardization
     train_df = stockdf.iloc[:split_idx].copy()
     val_df = stockdf.iloc[split_idx:].copy()
-    
+
     print(f"Training samples: {len(train_df)}")
     print(f"Validation samples: {len(val_df)}")
-    
+
     # Standardize using ONLY training statistics
-    train_df_std, val_df_std, means, stds = standardize_data(train_df, val_df, exclude_cols=['Date'])
-    
+    train_df_std, val_df_std, means, stds = standardize_data(
+        train_df, val_df, exclude_cols=["Date"]
+    )
+
     # Drop Date column for sequence creation
-    train_df_no_date = train_df_std.drop(columns=['Date'])
-    val_df_no_date = val_df_std.drop(columns=['Date'])
-    
+    train_df_no_date = train_df_std.drop(columns=["Date"])
+    val_df_no_date = val_df_std.drop(columns=["Date"])
+
     # Combine for sequence creation
     combined_df = pd.concat([train_df_no_date, val_df_no_date], ignore_index=True)
-    
-    print(f"\n{'='*60}")
+
+    print(f"\n{'=' * 60}")
     print("CREATING SEQUENCES")
-    print(f"{'='*60}")
-    
+    print(f"{'=' * 60}")
+
     # Create sequences
     contexts = []
     targets = []
-    
+
     for i in range(len(combined_df) - sequence_length):
         # Get sequence_length consecutive rows as context
-        context = combined_df.iloc[i:i+sequence_length].values.tolist()
+        context = combined_df.iloc[i : i + sequence_length].values.tolist()
         # Get Close price of next row as target
-        target = combined_df.iloc[i+sequence_length]['Close']
-        
+        target = combined_df.iloc[i + sequence_length]["Close"]
+
         contexts.append(context)
         targets.append(target)
-    
+
     print(f"Total sequences created: {len(contexts)}")
-    print(f"Context shape: {sequence_length} timesteps x {len(contexts[0][0])} features")
-    
+    print(
+        f"Context shape: {sequence_length} timesteps x {len(contexts[0][0])} features"
+    )
+
     # Split sequences into train/val
     # Adjust split to account for sequence_length offset
     train_sequences_end = len(train_df_no_date) - sequence_length
-    
+
     train_contexts = contexts[:train_sequences_end]
     train_targets = targets[:train_sequences_end]
     val_contexts = contexts[train_sequences_end:]
     val_targets = targets[train_sequences_end:]
-    
+
     print(f"\nTraining sequences: {len(train_contexts)}")
     print(f"Validation sequences: {len(val_contexts)}")
-    
+
     # Verify no data leakage
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print("DATA LEAKAGE CHECK")
-    print(f"{'='*60}")
-    
+    print(f"{'=' * 60}")
+
     if len(train_contexts) > 0 and len(val_contexts) > 0:
         # Check that last training context doesn't overlap with validation
         last_train_idx = train_sequences_end + sequence_length - 1
         first_val_idx = train_sequences_end
-        
+
         print(f"Last training sample uses data up to index: {last_train_idx}")
-        print(f"First validation sample starts at index: {first_val_idx + sequence_length}")
+        print(
+            f"First validation sample starts at index: {first_val_idx + sequence_length}"
+        )
         print(f"Gap: {(first_val_idx + sequence_length) - last_train_idx} samples")
-        
+
         if (first_val_idx + sequence_length) > last_train_idx:
             print("✅ No data leakage: validation doesn't see training data")
         else:
             print("⚠️  Warning: Potential data leakage detected")
-    
+
     # Create datasets
     train_dataset = StockDataset(train_contexts, train_targets)
     val_dataset = StockDataset(val_contexts, val_targets)
-    
+
     # Create dataloaders
     train_loader = DataLoader(
         train_dataset,
         batch_size=batch_size,
         shuffle=True,  # Shuffle training data
         num_workers=0,
-        pin_memory=torch.cuda.is_available()
+        pin_memory=torch.cuda.is_available(),
     )
 
     val_loader = DataLoader(
@@ -130,17 +141,27 @@ def preprocess_stock_data(stockdf, split_idx=config.train_test_split_percent, se
         batch_size=batch_size,
         shuffle=False,  # Don't shuffle validation
         num_workers=0,
-        pin_memory=torch.cuda.is_available()
+        pin_memory=torch.cuda.is_available(),
     )
-    
-    print(f"\n{'='*60}")
+
+    print(f"\n{'=' * 60}")
     print("DATALOADERS CREATED")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
     print(f"Training batches: {len(train_loader)}")
     print(f"Validation batches: {len(val_loader)}")
     print(f"Batch size: {batch_size}")
 
-    return train_contexts, train_targets, val_contexts, val_targets, train_loader, val_loader, means, stds, train_df
+    return (
+        train_contexts,
+        train_targets,
+        val_contexts,
+        val_targets,
+        train_loader,
+        val_loader,
+        means,
+        stds,
+        train_df,
+    )
 
 
 print("Data preprocessing module loaded!")
@@ -148,11 +169,11 @@ print("Data preprocessing module loaded!")
 # if __name__ == "__main__":
 #     # Test preprocessing
 #     train_contexts, train_targets, val_contexts, val_targets, train_loader, val_loader, means, stds, train_df = preprocess_stock_data(stockdf, split_idx)
-    
+
 #     print(f"\n{'='*60}")
 #     print("TESTING DATALOADERS")
 #     print(f"{'='*60}")
-    
+
 #     # Test a batch
 #     sample_batch = next(iter(train_loader))
 #     print(f"\nSample batch shapes:")
@@ -160,13 +181,13 @@ print("Data preprocessing module loaded!")
 #     print(f"  Target: {sample_batch['target'].shape}")
 #     print(f"  Context dtype: {sample_batch['context'].dtype}")
 #     print(f"  Target dtype: {sample_batch['target'].dtype}")
-    
+
 #     print(f"\nSample standardized values (first context, first timestep):")
 #     print(sample_batch['context'][0, 0, :])
-    
+
 #     print(f"\nSample target values (first 5):")
 #     print(sample_batch['target'][:5].flatten())
-    
+
 #     print(f"\n{'='*60}")
 #     print("STANDARDIZATION STATISTICS")
 #     print(f"{'='*60}")
@@ -174,131 +195,3 @@ print("Data preprocessing module loaded!")
 #     print(means)
 #     print("\nStandard deviations:")
 #     print(stds)
-
-# import torch
-# #from . import stockdataloader  # Relative import
-# from .stockdataloader import load_stock_data, denormalize_predictions
-# from . import config
-# from torch.utils.data import Dataset, DataLoader
-# from sklearn.model_selection import train_test_split
-# import numpy as np
-# import matplotlib.pyplot as plt
-# import pandas as pd
-
-# #contexts_df, targets_df = stockdataloader.load_stock_data(stockdataloader.path)
-# contexts_df, targets_df, means, stds = load_stock_data(config.path)
-
-
-# class StockDataset(Dataset):
-#     def __init__(self, contexts, targets):
-#         self.contexts = contexts
-#         self.targets = targets
-
-#     def __len__(self):
-#         return len(self.contexts)
-
-#     def __getitem__(self, idx):
-#         return {"context": self.contexts[idx], "target": self.targets[idx]}
-
-
-# def preprocess_stock_data(contexts_df, targets_df):
-#     contexts_df_no_date = contexts_df.drop(columns=["Date"])
-
-#     contexts = []
-#     targets = []
-#     for i in range(len(targets_df) - 1):
-#         contexts.append(contexts_df_no_date.iloc[i : i + 14].values.tolist())
-#         targets.append(targets_df.iloc[i]["Close"])
-
-#     #Train test split
-#     train_context_data = contexts[:int(len(contexts)*config.train_test_split_percent)]
-#     train_target_data = targets[:int(len(targets)*config.train_test_split_percent)]
-#     val_context_data = contexts[int(len(contexts)*config.train_test_split_percent):]
-#     val_target_data = targets[int(len(targets)*config.train_test_split_percent):]
-
-#     # train_context_data, val_context_data, train_target_data, val_target_data = (
-#     #     train_test_split(
-#     #         contexts,  # Context data
-#     #         targets,  # Target data
-#     #         test_size=0.2,  # 20% for validation (or use train_size=0.8)
-#     #         shuffle=False,  # Keep False for time series data!
-#     #         random_state=42,  # For reproducibility
-#     #     )
-#     # )
-
-#     # Convert to tensors
-#     train_context_data = torch.tensor(train_context_data, dtype=torch.float32)
-#     train_target_data = torch.tensor(train_target_data, dtype=torch.float32)
-#     val_context_data = torch.tensor(val_context_data, dtype=torch.float32)
-#     val_target_data = torch.tensor(val_target_data, dtype=torch.float32)
-
-#     # Create datasets
-#     train_dataset = StockDataset(train_context_data, train_target_data)
-
-#     val_dataset = StockDataset(val_context_data, val_target_data)
-
-#     # Create data loaders with larger batch size and pin_memory for faster data transfer
-#     batch_size = 32
-#     train_loader = DataLoader(
-#         train_dataset,
-#         batch_size=batch_size,
-#         # shuffle=True,
-#         # num_workers=2 if torch.cuda.is_available() else 0,
-#         # pin_memory=torch.cuda.is_available()
-#     )
-
-#     val_loader = DataLoader(
-#         val_dataset,
-#         batch_size=batch_size,
-#         # shuffle=False,
-#         # num_workers=2 if torch.cuda.is_available() else 0,
-#         # pin_memory=torch.cuda.is_available()
-#     )
-
-#     return (
-#         train_context_data,
-#         train_target_data,
-#         val_context_data,
-#         val_target_data,
-#         train_loader,
-#         val_loader,
-#     )
-#     #(train_context_data) = preprocess_stock_data(contexts_df, targets_df)
-#     #data = preprocess_stock_data(contexts_df, targets_df)
-#     #data
-
-# # train_context_data, train_target_data, val_context_data, val_target_data = preprocess_stock_data(contexts_df, targets_df)
-
-# print("Data preprocessing completed!")
-
-# if __name__ == "__main__":
-#     (
-#         train_context_data,
-#         train_target_data,
-#         val_context_data,
-#         val_target_data,
-#         train_loader,
-#         val_loader,
-#     ) = preprocess_stock_data(contexts_df, targets_df)
-#     print(f"Number of training contexts: {len(train_context_data)}")
-#     print(f"Number of training targets: {len(train_target_data)}")
-#     print("First context:", train_context_data[0])
-#     print("First target:", train_target_data[0])
-
-#     print(f"Number of training batches: {len(train_loader)}")
-#     print(f"Number of validation batches: {len(val_loader)}")
-
-#     train_context_np = train_context_data.numpy().flatten()
-
-#     train_context_denorm = denormalize_predictions(
-#         np.array(train_context_np), 'Close', means, stds
-#     )
-
-    # plt.figure(figsize=(10, 6))
-    # plt.plot(train_context_denorm, label="Training Data")
-    # plt.xlabel("Training Sample Index")
-    # plt.ylabel("Close ($)")
-    # plt.title("Training Data Close Price Over Samples")
-    # plt.legend()
-    # plt.grid(True)
-    # plt.savefig("results/training_closing_price.png")
