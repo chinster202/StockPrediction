@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
+
 # import stockpreprocess
 # import stockdataloader
 # import source.config as config
@@ -29,8 +30,8 @@ stockdf, split_idx = stockdataloader.load_stock_data(config.path)
     train_loader,
     val_loader,
     means,  # From TRAINING data only
-    stds,    # From TRAINING data only
-    train_df
+    stds,  # From TRAINING data only
+    train_df,
 ) = stockpreprocess.preprocess_stock_data(stockdf, split_idx)
 
 # (
@@ -46,13 +47,14 @@ model = StockGRU() if config.model_type == "StockGRU()" else StockLSTM()
 
 print(model)
 
+
 def train_epoch(model, train_loader, criterion, optimizer):
     model.train()
     total_loss = 0
 
     for batch in tqdm(train_loader, desc="Training", leave=False):
         context = batch["context"].float()
-        target = batch["target"].float() #.unsqueeze(1)
+        target = batch["target"].float()  # .unsqueeze(1)
 
         # print(context)
         # print(target)
@@ -85,7 +87,7 @@ def validate(model, val_loader, criterion):
     with torch.no_grad():
         for batch in tqdm(val_loader, desc="Validating", leave=False):
             context = batch["context"].float()
-            target = batch["target"].float() #.unsqueeze(1)
+            target = batch["target"].float()  # .unsqueeze(1)
 
             output = model(context)
             loss = criterion(output, target)
@@ -95,7 +97,7 @@ def validate(model, val_loader, criterion):
             all_outputs.append(output)
 
             total_loss += loss.item()
-    
+
     # Concatenate all batches into single tensors
     all_targets = torch.cat(all_targets, dim=0)
     all_outputs = torch.cat(all_outputs, dim=0)
@@ -115,8 +117,8 @@ def train_model(model, train_loader, val_loader, epochs=config.epochs, lr=config
 
     train_losses = []
     val_losses = []
-    #val_target_combined = []
-    #val_output_combined = []
+    # val_target_combined = []
+    # val_output_combined = []
     best_val_loss = float("inf")
 
     for epoch in range(epochs):
@@ -128,8 +130,8 @@ def train_model(model, train_loader, val_loader, epochs=config.epochs, lr=config
         train_losses.append(train_loss)
         val_losses.append(val_loss)
 
-        #val_target_combined.append(val_target)
-        #val_output_combined.append(val_output)
+        # val_target_combined.append(val_target)
+        # val_output_combined.append(val_output)
 
         print(f"Train Loss: {train_loss:.6f}, Val Loss: {val_loss:.6f}")
 
@@ -160,24 +162,23 @@ def plot_losses(train_losses, val_losses):
 
 
 def plot_predictions(val_target, val_output, means, stds):
-
     # Convert tensors to numpy arrays
     val_target_np = val_target.numpy().flatten()
     val_output_np = val_output.numpy().flatten()
- 
+
     # Denormalize predictions and targets
     val_target_denorm = stockdataloader.denormalize_predictions(
-        np.array(val_target_np), 'Close', means, stds
+        np.array(val_target_np), "Close", means, stds
     )
     val_output_denorm = stockdataloader.denormalize_predictions(
-        np.array(val_output_np), 'Close', means, stds
+        np.array(val_output_np), "Close", means, stds
     )
 
     plt.figure(figsize=(12, 6))
 
     # Create x-axis (sample indices)
     x_axis = np.arange(len(val_target_denorm))
-    
+
     # Plot 1: Line plot of predictions vs actual
     plt.plot(x_axis, val_target_denorm, label="Actual", linewidth=2, alpha=0.8)
     plt.plot(x_axis, val_output_denorm, label="Predicted", linewidth=2, alpha=0.8)
@@ -188,36 +189,52 @@ def plot_predictions(val_target, val_output, means, stds):
     plt.grid(True, alpha=0.3)
     plt.savefig("results/output.png")
 
-
     # Calculate percentage of predictions within ±10%
-    percentage_within_1_percent = np.mean(
-        np.abs((val_output_denorm - val_target_denorm) / val_target_denorm * 100) <= 1
-    ) * 100
+    percentage_within_1_percent = (
+        np.mean(
+            np.abs((val_output_denorm - val_target_denorm) / val_target_denorm * 100)
+            <= 1
+        )
+        * 100
+    )
 
     # Plot 2: Difference plot
     plt.figure(figsize=(12, 6))
-    plt.title(f"Prediction Error Percentage (Predicted - Actual)/(Actual)*100\n{percentage_within_1_percent:.2f}% of predictions within ±1% error")
+    plt.title(
+        f"Prediction Error Percentage (Predicted - Actual)/(Actual)*100\n{percentage_within_1_percent:.2f}% of predictions within ±1% error"
+    )
     plt.xlabel("Validation Sample Index")
     plt.ylabel("Error (%)")
     plt.grid(True, alpha=0.3)
-    plt.plot(x_axis, (val_output_denorm - val_target_denorm) / val_target_denorm * 100, label="Error (%)", color='orange', linewidth=2, alpha=0.8)
-    
+    plt.plot(
+        x_axis,
+        (val_output_denorm - val_target_denorm) / val_target_denorm * 100,
+        label="Error (%)",
+        color="orange",
+        linewidth=2,
+        alpha=0.8,
+    )
+
     # Lines at y = 1 and y = -1
-    plt.axhline(y=1, linestyle='--', color='red', label='1% Error Line')
-    plt.axhline(y=-1, linestyle='--', color='red', label='-1% Error Line')
-    plt.savefig("results/prediction_error.png") 
+    plt.axhline(y=1, linestyle="--", color="red", label="1% Error Line")
+    plt.axhline(y=-1, linestyle="--", color="red", label="-1% Error Line")
+    plt.savefig("results/prediction_error.png")
+
 
 def plot_train_contexts(train_df):
     # Plotting
     plt.figure(figsize=(12, 6))
-    plt.plot(train_df['Close'], label="Actual Train Close Price", linewidth=1)
+    plt.plot(train_df["Close"], label="Actual Train Close Price", linewidth=1)
     plt.xlabel("Timestep")
     plt.ylabel("Close Price ($)")
     plt.title("Actual Training 'Close' Prices")
     plt.legend()
     plt.grid(True, alpha=0.3)
     plt.savefig("results/actual_train_close_prices.png")
-    print("\Actual training close prices plot saved to results/actual_train_close_prices.png")
+    print(
+        "\Actual training close prices plot saved to results/actual_train_close_prices.png"
+    )
+
 
 # if __name__ == "__main__":
 #     # Get preprocessed data
@@ -262,7 +279,7 @@ def plot_train_contexts(train_df):
 
 #      # Plot results
 #     plot_losses(train_losses, val_losses)
-    
+
 #     # Plot predictions with denormalization
 #     plot_predictions(val_target, val_output, means, stds)
 

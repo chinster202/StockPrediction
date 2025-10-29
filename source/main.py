@@ -1,17 +1,13 @@
-import torch
-import torch.nn as nn
-import torch.optim as optim
+
 # import stockpreprocess
 # import stockdataloader
 # import source.config as config
 from . import stockpreprocess
 from . import stockdataloader
 from . import config
-from tqdm import tqdm
-import matplotlib.pyplot as plt
 from .model import StockLSTM, StockGRU
-import numpy as np
 from . import train
+
 
 def main():
     # Get preprocessed data
@@ -20,16 +16,16 @@ def main():
     stockdf, split_idx = stockdataloader.load_stock_data(config.path)
 
     (
-    train_context_data,
-    train_target_data,
-    val_context_data,
-    val_target_data,
-    train_loader,
-    val_loader,
-    means,  # From TRAINING data only
-    stds,    # From TRAINING data only
-    train_df
-) = stockpreprocess.preprocess_stock_data(stockdf, split_idx)
+        train_context_data,
+        train_target_data,
+        val_context_data,
+        val_target_data,
+        train_loader,
+        val_loader,
+        means,  # From TRAINING data only
+        stds,  # From TRAINING data only
+        train_df,
+    ) = stockpreprocess.preprocess_stock_data(stockdf, split_idx)
 
     # (
     #     _,
@@ -49,16 +45,18 @@ def main():
     # Initialize model with config parameters
     if config.model_type == "StockGRU":
         model = StockGRU(
-        input_size=config.input_size,
-        hidden_dim=config.hidden_dim,
-        num_layers=config.num_layers,
-        dropout=config.dropout) 
+            input_size=config.input_size,
+            hidden_dim=config.hidden_dim,
+            num_layers=config.num_layers,
+            dropout=config.dropout,
+        )
     else:
         model = StockLSTM(
-        input_size=config.input_size,
-        hidden_dim=config.hidden_dim,
-        num_layers=config.num_layers,
-        dropout=config.dropout)
+            input_size=config.input_size,
+            hidden_dim=config.hidden_dim,
+            num_layers=config.num_layers,
+            dropout=config.dropout,
+        )
 
     print("\nModel architecture:")
     print(model)
@@ -77,9 +75,9 @@ def main():
 
     print("")
 
-     # Plot results
+    # Plot results
     train.plot_losses(train_losses, val_losses)
-    
+
     # Plot predictions with denormalization
     train.plot_predictions(val_target, val_output, means, stds)
 
@@ -87,7 +85,6 @@ def main():
     print(f"Final Train Loss: {train_losses[-1]:.6f}")
     print(f"Final Val Loss: {val_losses[-1]:.6f}")
     print(f"Best Val Loss: {min(val_losses):.6f}")
-
 
 
 if __name__ == "__main__":

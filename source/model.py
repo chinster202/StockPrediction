@@ -1,13 +1,14 @@
 from . import config
 import torch.nn as nn
 
+
 class StockGRU(nn.Module):
     def __init__(
         self,
         input_size=config.input_size,
         hidden_dim=config.hidden_dim,
         num_layers=config.num_layers,
-        dropout=config.dropout
+        dropout=config.dropout,
     ):
         super(StockGRU, self).__init__()
 
@@ -59,7 +60,7 @@ class StockLSTM(nn.Module):
         input_size=config.input_size,
         hidden_dim=config.hidden_dim,
         num_layers=config.num_layers,
-        dropout=config.dropout
+        dropout=config.dropout,
     ):
         super(StockLSTM, self).__init__()
 
@@ -106,6 +107,6 @@ class StockLSTM(nn.Module):
 
 
 # Create model instance
-#model = StockLSTM()
+# model = StockLSTM()
 
-#print(model)
+# print(model)
