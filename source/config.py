@@ -83,6 +83,23 @@ dropout = config.get("model.dropout")
 model_type = config.get("model.model_type")
 error = config.get("training.error")
 
+# ARIMA parameters
+arima_type = config.get("arima.arima_type")
+# Regular ARIMA parameters
+p = config.get("arima.order.p")
+d = config.get("arima.order.d")
+q = config.get("arima.order.q")
+# SARIMA parameters (set to null for regular ARIMA)
+P = config.get("arima.seasonal_order.P")
+D = config.get("arima.seasonal_order.D")
+Q = config.get("arima.seasonal_order.Q")
+s = config.get("arima.seasonal_order.s")
+  # Auto ARIMA settings
+enabled = config.get("arima.auto_arima.enabled")
+max_p = config.get("arima.auto_arima.max_p")
+max_d = config.get("arima.auto_arima.max_d")
+max_q = config.get("arima.auto_arima.max_q")
+
 
 if __name__ == "__main__":
     print("Configuration loaded from:", config.config_path)

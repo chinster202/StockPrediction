@@ -117,8 +117,6 @@ def train_model(model, train_loader, val_loader, epochs=config.epochs, lr=config
 
     train_losses = []
     val_losses = []
-    # val_target_combined = []
-    # val_output_combined = []
     best_val_loss = float("inf")
 
     for epoch in range(epochs):
@@ -129,9 +127,6 @@ def train_model(model, train_loader, val_loader, epochs=config.epochs, lr=config
 
         train_losses.append(train_loss)
         val_losses.append(val_loss)
-
-        # val_target_combined.append(val_target)
-        # val_output_combined.append(val_output)
 
         print(f"Train Loss: {train_loss:.6f}, Val Loss: {val_loss:.6f}")
 
