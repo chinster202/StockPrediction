@@ -184,7 +184,7 @@ def plot_predictions(val_target, val_output, means, stds):
     plt.grid(True, alpha=0.3)
     plt.savefig("results/output.png")
 
-    # Calculate percentage of predictions within ±10%
+    # Calculate percentage of predictions within ±1%
     percentage_within_1_percent = (
         np.mean(
             np.abs((val_output_denorm - val_target_denorm) / val_target_denorm * 100)

@@ -69,6 +69,8 @@ class Config:
 config = Config(config_path="config.yaml")
 
 # Variables
+model = config.get("data_flow.model")
+
 train_test_split_percent = config.get("data.train_test_split_percent")
 path = config.get("data.data_path")
 sequence_length = config.get("data.sequence_length")
