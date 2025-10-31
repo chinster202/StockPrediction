@@ -1,3 +1,6 @@
+data_flow:
+  model: "ARIMA"  # Options: "RNN" or "ARIMA"
+
 data:
   train_test_split_percent: 0.8
   sequence_length: 3
@@ -21,7 +24,7 @@ training:
 # ARIMA section
 
 arima:
-  arima_type: "SARIMA"  # Options: "ARIMA" or "SARIMA"
+  arima_type: "ARIMA"  # Options: "ARIMA" or "SARIMA"
   # Regular ARIMA parameters
   order:
     p: 5  # AR order

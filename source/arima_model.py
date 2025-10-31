@@ -302,3 +302,94 @@ def auto_arima_order(data, column='Close', max_p=5, max_d=2, max_q=5):
     print(f"\n🏆 Best order: {best_order} (AIC: {best_aic:.2f})")
     
     return best_order
+
+
+def plot_predictions(train_data, test_data, predictions, column='Close'):
+    """Plot ARIMA predictions vs actual"""
+    
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(15, 10))
+    
+    # Plot 1: Full time series with predictions
+    train_dates = range(len(train_data))
+    test_dates = range(len(train_data), len(train_data) + len(test_data))
+    
+    ax1.plot(train_dates, train_data[column].values, label='Training Data', alpha=0.7)
+    ax1.plot(test_dates, test_data[column].values, label='Actual (Test)', linewidth=2)
+    ax1.plot(test_dates, predictions, label='Predicted', linewidth=2, linestyle='--')
+    ax1.set_xlabel('Time')
+    ax1.set_ylabel('Close Price ($)')
+    ax1.set_title('ARIMA Stock Price Predictions')
+    ax1.legend()
+    ax1.grid(True, alpha=0.3)
+    
+    # Plot 2: Zoom in on test period
+    ax2.plot(test_dates, test_data[column].values, label='Actual', marker='o', markersize=3)
+    ax2.plot(test_dates, predictions, label='Predicted', marker='x', markersize=3)
+    ax2.set_xlabel('Time')
+    ax2.set_ylabel('Close Price ($)')
+    ax2.set_title('ARIMA Predictions (Test Period Only)')
+    ax2.legend()
+    ax2.grid(True, alpha=0.3)
+    
+    plt.tight_layout()
+    plt.savefig('results/arima_predictions.png', dpi=150)
+    plt.close()
+    
+    print(f"\n✅ Prediction plot saved to results/arima_predictions.png")
+
+# Plot residuals
+def plot_residuals(test_data, predictions, column='Close'):
+    """Plot residual diagnostics"""
+
+    percentage_within_1_percent = (
+        np.mean(
+            np.abs((predictions/test_data[column].values - 1)*100)
+            <= 1
+        )
+        * 100
+    )
+    
+    #fig = model_fit.plot_diagnostics(figsize=(15, 10))
+    #Plot differences between actual and predicted values
+    plt.plot((predictions/test_data[column].values - 1)*100)
+    plt.title(
+        f"Prediction Error Percentage (Predicted - Actual)/(Actual)*100\n{percentage_within_1_percent:.2f}% of predictions within ±1% error"
+    )
+    plt.xlabel('Time')
+    plt.ylabel('Error (%)')
+    plt.grid(True, alpha=0.3)
+    # Lines at y = 1 and y = -1
+    plt.axhline(y=1, linestyle="--", color="red", label="1% Error Line")
+    plt.axhline(y=-1, linestyle="--", color="red", label="-1% Error Line")
+    plt.legend()
+    plt.savefig('results/arima_prediction_errors.png', dpi=150)
+    plt.close()
+    
+    print(f"✅ Prediction Error Percentage saved to results/arima_prediction_errors.png")
+
+
+# def plot_residuals(model_fit):
+#     """Plot residual diagnostics"""
+    
+#     fig = model_fit.plot_diagnostics(figsize=(15, 10))
+#     plt.tight_layout()
+#     plt.savefig('results/arima_residuals.png', dpi=150)
+#     plt.close()
+    
+#     print(f"✅ Residual diagnostics saved to results/arima_residuals.png")
+
+
+# def compare_predictions_sample(actuals, predictions, n_samples=10):
+#     """Print sample predictions vs actuals"""
+    
+#     print(f"\n{'='*60}")
+#     print(f"SAMPLE PREDICTIONS (first {n_samples})")
+#     print(f"{'='*60}")
+#     print(f"{'Index':<8} {'Actual':<12} {'Predicted':<12} {'Error':<12} {'Error %':<10}")
+#     print(f"{'-'*60}")
+    
+#     for i in range(min(n_samples, len(actuals))):
+#         error = predictions[i] - actuals[i]
+#         error_pct = (error / actuals[i]) * 100
+#         print(f"{i:<8} ${actuals[i]:<11.2f} ${predictions[i]:<11.2f} "
+#               f"${error:<11.2f} {error_pct:<9.2f}%")
