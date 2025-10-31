@@ -4,8 +4,27 @@ import pandas as pd
 import numpy as np
 from . import config
 
-path = "data/A.csv"
+path = config.path
 
+# def load_stock_data_raw(path=config.path, split_ratio=config.train_test_split_percent):
+#     """
+#     Load stock data WITHOUT any standardization (for ARIMA)
+    
+#     Returns:
+#         stockdf: Raw unstandardized dataframe
+#         split_idx: Train/val split index
+#     """
+#     stockdf = pd.read_csv(path)
+#     print(f"Total examples in dataset: {len(stockdf)}")
+    
+#     # Check for missing values
+#     if stockdf.isnull().any().any():
+#         print("⚠️  Warning: Dataset contains missing values. Filling with forward fill.")
+#         stockdf = stockdf.fillna(method='ffill').fillna(method='bfill')
+    
+#     split_idx = int(len(stockdf) * split_ratio)
+    
+#     return stockdf, split_idx
 
 def load_stock_data(path=config.path, split_ratio=config.train_test_split_percent):
     """

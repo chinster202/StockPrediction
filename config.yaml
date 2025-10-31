@@ -1,6 +1,6 @@
 data:
   train_test_split_percent: 0.8
-  sequence_length: 7
+  sequence_length: 3
   batch_size: 32
   data_path: "data/A.csv"
 
@@ -8,7 +8,7 @@ model:
   hidden_dim: 64
   num_layers: 2
   dropout: 0
-  input_size: 6
+  input_size: 1
   model_type: "StockLSTM"  # Options: "StockLSTM" or "StockGRU"
 
 training:
@@ -17,3 +17,27 @@ training:
   patience: 5
   lr_factor: 0.5
   error: "MSE"
+
+# ARIMA section
+
+arima:
+  arima_type: "SARIMA"  # Options: "ARIMA" or "SARIMA"
+  # Regular ARIMA parameters
+  order:
+    p: 5  # AR order
+    d: 1  # Differencing
+    q: 0  # MA order
+  
+  # SARIMA parameters (set to null for regular ARIMA)
+  seasonal_order:
+    P: 1  # Seasonal AR order
+    D: 1  # Seasonal differencing
+    Q: 1  # Seasonal MA order
+    s: 21  # Seasonal period (21 trading days = ~1 month)
+  
+  # Auto ARIMA settings
+  auto_arima:
+    enabled: false
+    max_p: 5
+    max_d: 2
+    max_q: 5

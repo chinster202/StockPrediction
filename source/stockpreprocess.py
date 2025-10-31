@@ -62,8 +62,8 @@ def preprocess_stock_data(
     )
 
     # Drop Date column for sequence creation
-    train_df_no_date = train_df_std.drop(columns=["Date"])
-    val_df_no_date = val_df_std.drop(columns=["Date"])
+    train_df_no_date = train_df_std.drop(columns=["Date","Adj Close","Volume","Open","High","Low"])
+    val_df_no_date = val_df_std.drop(columns=["Date","Adj Close","Volume","Open","High","Low"])
 
     # Combine for sequence creation
     combined_df = pd.concat([train_df_no_date, val_df_no_date], ignore_index=True)
@@ -166,32 +166,48 @@ def preprocess_stock_data(
 
 print("Data preprocessing module loaded!")
 
-# if __name__ == "__main__":
-#     # Test preprocessing
-#     train_contexts, train_targets, val_contexts, val_targets, train_loader, val_loader, means, stds, train_df = preprocess_stock_data(stockdf, split_idx)
+if __name__ == "__main__":
+    # Test preprocessing
+    train_contexts, train_targets, val_contexts, val_targets, train_loader, val_loader, means, stds, train_df = preprocess_stock_data(stockdf, split_idx)
 
-#     print(f"\n{'='*60}")
-#     print("TESTING DATALOADERS")
-#     print(f"{'='*60}")
+    print(f"\n{'='*60}")
+    print("TESTING DATALOADERS")
+    print(f"{'='*60}")
 
-#     # Test a batch
-#     sample_batch = next(iter(train_loader))
-#     print(f"\nSample batch shapes:")
-#     print(f"  Context: {sample_batch['context'].shape}")
-#     print(f"  Target: {sample_batch['target'].shape}")
-#     print(f"  Context dtype: {sample_batch['context'].dtype}")
-#     print(f"  Target dtype: {sample_batch['target'].dtype}")
+    # Test a batch
+    sample_batch = next(iter(train_loader))
+    print(f"\nSample batch shapes:")
+    print(f"  Context: {sample_batch['context'].shape}")
+    print(f"  Target: {sample_batch['target'].shape}")
+    print(f"  Context dtype: {sample_batch['context'].dtype}")
+    print(f"  Target dtype: {sample_batch['target'].dtype}")
 
-#     print(f"\nSample standardized values (first context, first timestep):")
-#     print(sample_batch['context'][0, 0, :])
+    print(f"\nSample standardized values (first context, first timestep):")
+    print(sample_batch['context'][0, 0, :])
 
-#     print(f"\nSample target values (first 5):")
-#     print(sample_batch['target'][:5].flatten())
+    print(f"\nSample target values (first 5):")
+    print(sample_batch['target'][:5].flatten())
 
-#     print(f"\n{'='*60}")
-#     print("STANDARDIZATION STATISTICS")
-#     print(f"{'='*60}")
-#     print("\nMeans:")
-#     print(means)
-#     print("\nStandard deviations:")
-#     print(stds)
+    print(f"\n{'='*60}")
+    print("STANDARDIZATION STATISTICS")
+    print(f"{'='*60}")
+    print("\nMeans:")
+    print(means)
+    print("\nStandard deviations:")
+    print(stds)
+
+    print(f"\n{'='*60}")
+    print("SAMPLE SEQUENCES")
+    print("Train context for first sequence:")
+    print(train_contexts[0])
+    print("Validation context for first sequence:")
+    print(val_contexts[0])
+
+    print(f"\nSAMPLE TARGETS")
+    print("Train target for first sequence:")
+    print(train_targets[0])
+    print("Validation target for first sequence:")
+    print(val_targets[0])
+
+    print(train_loader)
+    print(val_loader)
