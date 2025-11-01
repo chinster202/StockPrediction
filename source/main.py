@@ -8,14 +8,14 @@ from . import config
 from .model import StockLSTM, StockGRU
 from . import train
 from .arima_model import StockARIMA, auto_arima_order, plot_predictions, plot_residuals
+from .trading_strategy import TradingSimulator, run_parameter_sweep
 
 
 def main():
     # Get preprocessed data
+    stockdf, split_idx = stockdataloader.load_stock_data(config.path)
 
     if config.model == "RNN":
-
-        stockdf, split_idx = stockdataloader.load_stock_data(config.path)
 
         (
             _,
@@ -84,9 +84,6 @@ def main():
         print("="*60)
         print("ARIMA STOCK PRICE PREDICTION")
         print("="*60)
-        
-        # Load data (no standardization needed for ARIMA)
-        stockdf, split_idx = stockdataloader.load_stock_data(config.path)
         
         # Split into train and test
         train_df = stockdf.iloc[:split_idx].copy()
@@ -167,6 +164,32 @@ def main():
         print(f"RMSE: ${metrics['rmse']:.2f}")
         print(f"MAPE: {metrics['mape']:.2f}%")
         print(f"Direction Accuracy: {metrics['direction_accuracy']:.2f}%")
+
+        # Run trading simulation
+        print("\n" + "="*80)
+        print("TRADING SIMULATION")
+        print("="*80)
+        
+        simulator = TradingSimulator(
+            initial_capital=100000,
+            n_days_threshold=9,
+            transaction_fee=0.001  # 0.1% transaction fee
+        )
+        
+        trading_results = simulator.simulate(actuals, predictions)
+        simulator.plot_results(actuals)
+        
+        # Optional: Run parameter sweep to find best n_days_threshold
+        print("\n" + "="*80)
+        run_sweep = input("Run parameter sweep to find optimal n_days_threshold? (y/n): ").lower()
+        
+        if run_sweep == 'y':
+            sweep_results = run_parameter_sweep(
+                actuals, 
+                predictions, 
+                n_days_range=range(1, 11),
+                initial_capital=100000
+            )
 
 if __name__ == "__main__":
     main()
