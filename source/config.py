@@ -96,7 +96,7 @@ P = config.get("arima.seasonal_order.P")
 D = config.get("arima.seasonal_order.D")
 Q = config.get("arima.seasonal_order.Q")
 s = config.get("arima.seasonal_order.s")
-  # Auto ARIMA settings
+# Auto ARIMA settings
 enabled = config.get("arima.auto_arima.enabled")
 max_p = config.get("arima.auto_arima.max_p")
 max_d = config.get("arima.auto_arima.max_d")
