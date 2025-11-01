@@ -5,7 +5,7 @@ data:
   train_test_split_percent: 0.8
   sequence_length: 3
   batch_size: 32
-  data_path: "data/A.csv"
+  data_path: "data/AMD.csv"
 
 model:
   hidden_dim: 64
