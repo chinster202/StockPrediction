@@ -5,7 +5,7 @@ data:
   train_test_split_percent: 0.8
   sequence_length: 3
   batch_size: 32
-  data_path: "data/AMD.csv"
+  data_path: "data/BA.csv"
 
 model:
   hidden_dim: 64
@@ -44,3 +44,8 @@ arima:
     max_p: 5
     max_d: 2
     max_q: 5
+
+trading:
+  initial_capital: 100000
+  n_days_threshold: 5
+  transaction_fee: 0.001

@@ -102,6 +102,10 @@ max_p = config.get("arima.auto_arima.max_p")
 max_d = config.get("arima.auto_arima.max_d")
 max_q = config.get("arima.auto_arima.max_q")
 
+# Trading parameters
+initial_capital = config.get("trading.initial_capital")
+n_days_threshold = config.get("trading.n_days_threshold")
+transaction_fee = config.get("trading.transaction_fee")
 
 if __name__ == "__main__":
     print("Configuration loaded from:", config.config_path)
