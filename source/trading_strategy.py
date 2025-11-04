@@ -3,13 +3,13 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-
+from . import config
 
 class TradingSimulator:
     """Simulate trading strategy based on model predictions"""
 
     def __init__(
-        self, initial_capital=100000, n_days_threshold=3, transaction_fee=0.001
+        self, initial_capital=config.initial_capital, n_days_threshold=config.n_days_threshold, transaction_fee=config.transaction_fee
     ):
         """
         Initialize trading simulator
@@ -81,6 +81,12 @@ class TradingSimulator:
                 "total_value": self.get_portfolio_value(price),
             }
         return None
+
+    def shortsell(self, price, date):
+        """Short sell stock with all available cash"""
+        # This method can be implemented if short selling is allowed
+        
+        pass
 
     def hold(self, price, date):
         """Hold current position"""
