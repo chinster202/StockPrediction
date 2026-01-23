@@ -1,0 +1,10 @@
+.DS_Store
+# Lambda layers and zip files
+clean-lambda/
+layers/
+*.zip
+pytorch_layer.zip
+source/__pycache__/
+tests/__pycache__/
+.pytest_cache/
+.env/
