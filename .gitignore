@@ -7,4 +7,5 @@ pytorch_layer.zip
 source/__pycache__/
 tests/__pycache__/
 .pytest_cache/
+python/
 .env/
