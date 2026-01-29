@@ -6,7 +6,7 @@ data:
   sequence_length: 3
   batch_size: 32
   data_path: "data/BA.csv"
-  tickers: ["GOOG", "AAPL", "MSFT", "NVDA"]
+  tickers: ["GOOG", "AAPL", "MSFT", "NVDA", "AMZN"]
   start_date: "2005-01-01"
   end_date: "2021-01-01"
 
