@@ -2,8 +2,9 @@ import numpy as np
 import yfinance as yf
 from statsmodels.tsa.arima.model import ARIMAResults
 import pandas as pd
-from . import config
-from . import arima_model
+import config
+import arima_model
+from celery import Celery
 
 def load_model(ticker_path):
     """
@@ -30,9 +31,18 @@ def import_data():
         today = pd.to_datetime("today").date()
 
         # Subtract two years using pd.DateOffset
-        two_years_ago = today - pd.DateOffset(years=2)
+        # two_years_ago = today - pd.DateOffset(years=2)
 
-        yf_data = yf.download(path, start=two_years_ago.strftime("%Y-%m-%d"), end=today.strftime("%Y-%m-%d"))
+        print(f"Today's date: {today}")
+
+        tomorrow = today + pd.DateOffset(days=1)
+        print(f"Tomorrow's date: {tomorrow}")
+
+        backdate = pd.to_datetime(today - pd.DateOffset(days=11))
+
+        yf_data = yf.download(path, start=backdate.strftime("%Y-%m-%d"), end=tomorrow.strftime("%Y-%m-%d"))
+
+        # yf_data = yf.download(path, start=two_years_ago.strftime("%Y-%m-%d"), end=today.strftime("%Y-%m-%d"))
 
         print(f'datatype is {type(yf_data)} \n')
 
@@ -52,6 +62,9 @@ def import_data():
 
         print(f"✅ Downloaded data for {path} from yfinance and saved to data/{path}_latest.csv")
 
+app = Celery('hello', broker='redis://localhost:6379/0')      
+
+@app.task
 def main():
 
     import_data()
